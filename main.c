@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include <fts.h>
+#include <locale.h>
 
 #include "common.h"
 #include "screen.h"
@@ -33,7 +34,8 @@ unsigned long goodcp;
 char *databuf = NULL;
 
 int main(int argc, char *argv[]) {	
-	
+
+	setlocale(LC_CTYPE, "");
 	struct stat st,st2;
 	int fts_opt;
 	int ch;
