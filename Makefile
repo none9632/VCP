@@ -1,5 +1,5 @@
-CC = cc
-CFLAGS += -Wall
+CC = gcc
+CFLAGS += -Wall -fcommon -O3
 PREFIX ?= /usr/local
 OBJS = main.o copyall.o copy.o screen.o log.o path.o misc.o color.o
 
