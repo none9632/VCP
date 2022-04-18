@@ -190,11 +190,11 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 	if(sizecpd < 1024)
 		wprintw(mainw,"%lu B ",sizecpd);
 	else if(sizecpd < 1048576)
-		wprintw(mainw,"%1.2f kB ",(float)sizecpd/1024);
+		wprintw(mainw,"%1.2f K ",(float)sizecpd/1024);
 	else if(sizecpd < 1073741824)
-		wprintw(mainw,"%1.2f mB ",(float)sizecpd/1048576);
+		wprintw(mainw,"%1.2f M ",(float)sizecpd/1048576);
 	else
-		wprintw(mainw,"%1.2f gB ",(float)sizecpd/1073741824);
+		wprintw(mainw,"%1.2f G ",(float)sizecpd/1073741824);
 	
 	coloron(mainw);
 	waddch(mainw,'/');
@@ -203,11 +203,11 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 	if(size < 1024)
 		wprintw(mainw," %lu B",size);
 	else if(size < 1048576)
-		wprintw(mainw," %1.2f kB",(float)size/1024);
+		wprintw(mainw," %1.2f K",(float)size/1024);
 	else if(size < 1073741824)
-		wprintw(mainw," %1.2f mB",(float)size/1048576);
+		wprintw(mainw," %1.2f M",(float)size/1048576);
 	else
-		wprintw(mainw," %1.2f gB",(float)size/1073741824);
+		wprintw(mainw," %1.2f G",(float)size/1073741824);
 	
 	wmove(mainw,5,0);
 	wclrtoeol(mainw);
@@ -246,13 +246,13 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 	coloroff(mainw);
 	
 	if(speed < 1024)
-		wprintw(mainw,"%lu B/sec",speed);
+		wprintw(mainw," %lu B/sec",speed);
 	else if(speed < 1048576)
-		wprintw(mainw,"%1.2f kB/sec",(float)speed/1024);
+		wprintw(mainw," %1.2f K/sec",(float)speed/1024);
 	else if(speed < 1073741824)
-		wprintw(mainw,"%1.2f mB/sec",(float)speed/1048576);
+		wprintw(mainw," %1.2f M/sec",(float)speed/1048576);
 	else
-		wprintw(mainw,"%1.2f gB/sec",(float)speed/1073741824);
+		wprintw(mainw," %1.2f G/sec",(float)speed/1073741824);
 
 	coloron(mainw);
 	waddch(mainw,' ');
@@ -354,20 +354,20 @@ void scrn_updtxt(unsigned long sizecpd,unsigned long size,int lastl) {
 	if(speed < 1024)
 		x += fprintf(stderr,"] %lu B/sec",speed);
 	else if(speed < 1048576)
-		x += fprintf(stderr,"] %1.2f kB/sec",(float)speed/1024);
+		x += fprintf(stderr,"] %1.2f K/sec",(float)speed/1024);
 	else if(speed < 1073741824)
-		x += fprintf(stderr,"] %1.2f mB/sec",(float)speed/1048576);
+		x += fprintf(stderr,"] %1.2f M/sec",(float)speed/1048576);
 	else
-		x += fprintf(stderr,"] %1.2f gB/sec",(float)speed/1073741824);
+		x += fprintf(stderr,"] %1.2f G/sec",(float)speed/1073741824);
 
 	if(sizecpd < 1024)
 		x += fprintf(stderr," (%lu B",sizecpd);
 	else if(size < 1048576)
-		x += fprintf(stderr," (%1.2f kB",(float)sizecpd/1024);
+		x += fprintf(stderr," (%1.2f K",(float)sizecpd/1024);
 	else if(size < 1073741824)
-		x += fprintf(stderr," (%1.2f mB",(float)sizecpd/1048576);
+		x += fprintf(stderr," (%1.2f M",(float)sizecpd/1048576);
 	else
-		x += fprintf(stderr," (%1.2f gB",(float)sizecpd/1073741824);
+		x += fprintf(stderr," (%1.2f G",(float)sizecpd/1073741824);
 	
 	x += fprintf(stderr,")    \b\b\b\b");
 	
