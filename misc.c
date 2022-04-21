@@ -109,7 +109,7 @@ void done(int i) {
 
 	if(use_curses && scrn_state == SCRN_KEYWAIT) {
 		char ch = wgetch(logw);
-		// If you run for example 'alacritty -c <command>' then for some reason 
+		// If you run for example 'alacritty -e <command>' then for some reason 
 		// wgetch gets the value -102. I don't know what it's about, but this
 		// crutch solves the problem.
 		if (ch == -102)
