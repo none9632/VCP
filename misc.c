@@ -106,10 +106,16 @@ void done(int i) {
 			logaddi(LOG_MSG,"%d files copied, %d failed",goodcp,totalfiles-goodcp);
 		}
 	}
-	
-	if(use_curses && scrn_state == SCRN_KEYWAIT)
-		wgetch(logw);
-	
+
+	if(use_curses && scrn_state == SCRN_KEYWAIT) {
+		char ch = wgetch(logw);
+		// If you run for example 'alacritty -c <command>' then for some reason 
+		// wgetch gets the value -102. I don't know what it's about, but this
+		// crutch solves the problem.
+		if (ch == -102)
+			wgetch(logw);
+	}
+
 	exit_pre();
 	exit(ret);
 }
