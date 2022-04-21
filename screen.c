@@ -172,7 +172,6 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 	static unsigned long speed = 0;
 	struct timeval now;
 	static struct timeval last;
-	unsigned int timer = 0;
 
 	if(!use_curses)
 		return;
@@ -185,7 +184,7 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 	wclrtoeol(mainw);	
 	wmove(mainw,3,0);
 	wattron(mainw,A_BOLD);
-	wprintw(mainw,"Copied: ");
+	wprintw(mainw,"Copied:  ");
 	wattroff(mainw,A_BOLD);
 	if(sizecpd < 1024)
 		wprintw(mainw,"%lu B ",sizecpd);
@@ -195,7 +194,7 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 		wprintw(mainw,"%1.2f M ",(float)sizecpd/1048576);
 	else
 		wprintw(mainw,"%1.2f G ",(float)sizecpd/1073741824);
-	
+
 	coloron(mainw);
 	waddch(mainw,'/');
 	coloroff(mainw);
@@ -208,14 +207,14 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 		wprintw(mainw," %1.2f M",(float)size/1048576);
 	else
 		wprintw(mainw," %1.2f G",(float)size/1073741824);
-	
-	wmove(mainw,5,0);
+
+	wmove(mainw,4,0);
 	wclrtoeol(mainw);
-	wmove(mainw,5,0);
+	wmove(mainw,4,0);
 	wattron(mainw,A_BOLD);
-	wprintw(mainw,"ETR: ");
+	wprintw(mainw,"Speed:   ");
 	wattroff(mainw,A_BOLD);
-	
+
 	gettimeofday(&now,NULL);
 	if(sizelast > sizecpd)
 		sizelast = 0;
@@ -225,39 +224,16 @@ void scrn_upd_part(unsigned long sizecpd,unsigned long size) {
 		gettimeofday(&last,NULL);
 		sizelast = sizecpd;
 	}
-	if((size - sizecpd) < 1 || speed < 1) {
-		wprintw(mainw,"? sec ");
-	} else {
-		timer = (size - sizelast) / (int)speed;
-	
-		if(timer > 3600) {
-			wprintw(mainw,"%d hrs ",timer / 3600);
-			timer -= ((timer / 3600) * 3600);
-		}
-		if(timer > 60) {
-			wprintw(mainw,"%d min ",timer / 60);
-			timer -= ((timer / 60) * 60);
-		}
-		wprintw(mainw,"%d sec ",timer);
-	}
-	
-	coloron(mainw);
-	waddch(mainw,':');
-	coloroff(mainw);
-	
-	if(speed < 1024)
-		wprintw(mainw," %lu B/sec",speed);
-	else if(speed < 1048576)
-		wprintw(mainw," %1.2f K/sec",(float)speed/1024);
-	else if(speed < 1073741824)
-		wprintw(mainw," %1.2f M/sec",(float)speed/1048576);
-	else
-		wprintw(mainw," %1.2f G/sec",(float)speed/1073741824);
 
-	coloron(mainw);
-	waddch(mainw,' ');
-	coloroff(mainw);
-	
+	if(speed < 1024)
+		wprintw(mainw,"%lu B/sec",speed);
+	else if(speed < 1048576)
+		wprintw(mainw,"%1.2f K/sec",(float)speed/1024);
+	else if(speed < 1073741824)
+		wprintw(mainw,"%1.2f M/sec",(float)speed/1048576);
+	else
+		wprintw(mainw,"%1.2f G/sec",(float)speed/1073741824);
+
 	if(totalfiles == 1) {
 		scrn_setsb(7,(float)sizecpd / (float)size * (float)mainwsbw);
 	}
