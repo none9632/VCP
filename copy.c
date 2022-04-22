@@ -136,13 +136,6 @@ int copyfile(char *srcfile, char *destfile, struct stat *st) {
 		return 1;
 	}
 	if(stat(destfile,&st2) != -1) {
-		if(cflag) {
-			do {
-				strncat(destfile, "_", 1);
-			} while(stat(destfile, &st2) != -1);
-			f2 = open(destfile, O_WRONLY | O_CREAT | O_TRUNC,\
-				st->st_mode & ~(S_ISUID | S_ISGID));
-		}
 		if(iflag || Iflag) {
 			if(logget(destfile))
 				return 1;
