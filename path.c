@@ -19,7 +19,7 @@ possibilities:
 */
 int pathdadd(char *master,char *dir) {
 	int end = strlen(master)-1;
-	
+
 	if(dir == NULL)
 		return 0;
 	if(pathchsize(master,dir))
@@ -40,7 +40,7 @@ int pathdadd(char *master,char *dir) {
 int pathchsize(char *path, char *path2) {
 	int i = 0;
 	int d = 0;
-	
+
 	if(path == path2) {
 		i = strlen(path);
 		if(i<(MAXPATHLEN - 1))
@@ -50,12 +50,12 @@ int pathchsize(char *path, char *path2) {
 			i = strlen(path);
 		if(path2 != NULL)
 			d = strlen(path2);
-	
+
 		if((i+d)<(MAXPATHLEN - 1))
 			return 0;
 	}
 	pathlong(path,path2);
-	return 1;	
+	return 1;
 }
 
 /* print 20 characters from the string(s),

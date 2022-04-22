@@ -28,24 +28,23 @@ int copyall(char *args[],int fts_opt,int type) {
 	int ret = 0;
 	mode_t mode,mask;
 	int base = 0;
-		
+
 	mask = ~umask(0777);
 	umask(~mask);
-		
+
 	if(pathchsize(dest.opath,dest.opath)) {
 		ret = 1;
 		return 1;
 	}
-	
+
 	ftsarg = fts_open(args,fts_opt,0);
 	if(ftsarg == NULL) {
 		logadds(LOG_ERR,"fts: %s",strerror(errno),NULL);
 		ret = 1;
 		return 1;
 	}
-	
+
 	while((ftsf = fts_read(ftsarg)) != NULL) {
-		
 		switch(ftsf->fts_info) {
 		case FTS_NS:
 		case FTS_DNR:
@@ -62,9 +61,18 @@ int copyall(char *args[],int fts_opt,int type) {
 			continue;
 		}
 
+		if (cflag) {
+			type = T_NED;
+			for (int i = 0; i < paths.size; i++) {
+				if (strcmp(paths.src[i], ftsf->fts_path) == 0) {
+					dest.opath = paths.dest[i];
+					break;
+				}
+			}
+		}
 		dest.path[0] = '\0';
 		strcpy(dest.path,dest.opath);
-			
+
 		if(type != T_FILE) {
 			if(type == T_DIR) {
 				if(ftsf->fts_level == FTS_ROOTLEVEL) {
@@ -86,32 +94,33 @@ int copyall(char *args[],int fts_opt,int type) {
 				mode = ftsf->fts_statp->st_mode;
 				if((mode & (S_ISUID | S_ISGID)) || \
 				  ((mode | S_IRWXU) & mask) != (mode & mask)) {
-				  	if(chmod(dest.path,mode & mask) != 0) {
-				  		logadds(LOG_ERR,"chmod: %s",strerror(errno),NULL);
-				  	}
+					if(chmod(dest.path,mode & mask) != 0) {
+						logadds(LOG_ERR,"chmod: %s",strerror(errno),NULL);
+					}
 				}
 			}
 			continue;
 		}
-		
+
 		if(stat(dest.path,&st) == -1) {
 			dne = 1; /* file doesn't exist */
-		} else {
-			if((st.st_dev==ftsf->fts_statp->st_dev) &&
-			   (st.st_ino==ftsf->fts_statp->st_ino)) {
+		}
+		else {
+			if((st.st_dev == ftsf->fts_statp->st_dev) &&
+			   (st.st_ino == ftsf->fts_statp->st_ino)) {
 				logadds(LOG_ERR,"%s and %s are identical, not copied",\
 					ftsf->fts_path,dest.path);
 				if(S_ISDIR(st.st_mode))
 					fts_set(ftsarg,ftsf,FTS_SKIP);
 				continue;
 			}
-			if(!S_ISDIR(ftsf->fts_statp->st_mode)&&(S_ISDIR(st.st_mode))){
+			if(!S_ISDIR(ftsf->fts_statp->st_mode) && (S_ISDIR(st.st_mode))){
 				logadds(LOG_ERR,"Can not overwrite %s with non-directory %s",\
 					dest.path,ftsf->fts_path);
 				ret = 1;
 				continue;
 			}
-			
+
 			if(!S_ISDIR(ftsf->fts_statp->st_mode) && uflag) {
 				if(st.st_size == ftsf->fts_statp->st_size &&\
 					difftime(st.st_mtime,ftsf->fts_statp->st_mtime) > 0) {
@@ -121,11 +130,10 @@ int copyall(char *args[],int fts_opt,int type) {
 						dest.path,NULL);
 					continue;
 				}
-				
 			}
 			dne = 0;
 		}
-			
+
 		switch(ftsf->fts_statp->st_mode & S_IFMT) {
 		/* link */
 		case S_IFLNK:

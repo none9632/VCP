@@ -26,11 +26,18 @@
 WINDOW *mainw;
 WINDOW *logw;
 
+struct new_paths {
+	char **src;
+	char **dest;
+	int size;
+};
 struct dest_new {
 	char *opath;
 	char path[MAXPATHLEN+1];
 };
+
 extern struct dest_new dest;
+extern struct new_paths paths;
 
 extern unsigned long totalfiles;
 extern unsigned long curfile;
@@ -39,7 +46,7 @@ extern unsigned long goodcp;
 extern int Rflag,vflag,Hflag,Pflag,\
 	Lflag,fflag,iflag,tflag,pflag, \
 	dflag,hflag,mflag,Vflag,Iflag, \
-	nflag,uflag;
+	nflag,uflag,cflag;
 
 
 #define SCRN_LEAVE    0

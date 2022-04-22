@@ -294,8 +294,8 @@ int conf_read(int path) {
 		CYAN,
 		BLACK,
 		YELLOW,
-		
-		0,					
+
+		0,
 	};
 	int xmax = 17;
 	x = 0;
@@ -306,7 +306,7 @@ int conf_read(int path) {
 		}		
 		*fullhome = '\0';
 		strcat(fullhome,"/etc/vcp.conf");
-	
+
 	} else {
 		if((home = getenv("HOME")) == NULL) {
 			return -1;
@@ -438,6 +438,10 @@ int flag_setc(char c, int value) {
 		break;
 	case 'u':
 		uflag = value;
+		return value;
+		break;
+	case 'c':
+		cflag = value;
 		return value;
 		break;
 	default:

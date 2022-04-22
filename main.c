@@ -5,15 +5,19 @@
  * For more information see COPYRIGHT.
  */
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <fts.h>
 #include <locale.h>
+#include <string.h>
 
 #include "common.h"
 #include "screen.h"
 #include "misc.h"
+#include "path.h"
 
 struct dest_new dest;
+struct new_paths paths;
 
 int use_color = 0;
 int use_curses = 0;
@@ -24,7 +28,7 @@ int scrn_border = 0;
 int buf_size = 0;
 int Rflag,vflag,Hflag,Pflag,Lflag,fflag,iflag,\
 	tflag,pflag,dflag,hflag,mflag,Vflag,Iflag,\
-	nflag,uflag;
+	nflag,uflag,cflag;
 
 unsigned long totalfiles;
 unsigned long curfile;
@@ -33,7 +37,7 @@ unsigned long goodcp;
 /* used to read/write file data */
 char *databuf = NULL;
 
-int main(int argc, char *argv[]) {	
+int main(int argc, char *argv[]) {
 
 	setlocale(LC_CTYPE, "");
 	struct stat st,st2;
@@ -48,7 +52,7 @@ int main(int argc, char *argv[]) {
 	conf_read(1); /* global */
 	conf_read(0); /*  user  */
 
-	while ((ch = getopt(argc, argv, "HLPRfinpvtdIVmhb:u")) != -1) {
+	while ((ch = getopt(argc, argv, "HLPRfinpvtdcIVmhb:u")) != -1) {
 		if(ch == 'b') {
 			buf_size = atoi(optarg);
 		}
@@ -64,7 +68,7 @@ int main(int argc, char *argv[]) {
 		printf("VCP %d.%d\n",VER_MAJ,VER_MIN);
 		return 0;
 	}
-	
+
 	if(hflag) {
 		printf("VCP %d.%d\n",VER_MAJ,VER_MIN);
 		printf("usage:\n");
@@ -89,6 +93,7 @@ int main(int argc, char *argv[]) {
 		printf("-m\tmulti-output file copy\n");
 		printf("-b BUF\tset read buffer size (bytes)\n");
 		printf("-u\tfiles present with newer time stamp and same size are not copied\n");
+		printf("-c\twhen an existing file is found changes 'name' to 'name_'\n");
 		printf("-h\tprint this\n");
 		return 0;
 	}
@@ -106,6 +111,18 @@ int main(int argc, char *argv[]) {
 	}
 	if(fflag && iflag) {
 		printf("-f and -i conflict\n");
+		usage();
+	}
+	if(cflag && iflag) {
+		printf("-c and -i conflict\n");
+		usage();
+	}
+	if(cflag && fflag) {
+		printf("-c and -f conflict\n");
+		usage();
+	}
+	if(cflag && nflag) {
+		printf("-c and -n conflict\n");
 		usage();
 	}
 
@@ -126,7 +143,7 @@ int main(int argc, char *argv[]) {
 		Lflag = 0;
 		logadds(LOG_VRB,"-L ignored",NULL,NULL);
 	}
-	
+
 	if(Pflag) {
 		if(Lflag) {
 			Lflag = 0;
@@ -135,13 +152,13 @@ int main(int argc, char *argv[]) {
 		if(Hflag) {
 			Hflag = 0;
 			logadds(LOG_VRB,"-H ignored",NULL,NULL);
-		} 
+		}
 	}
 	if(Hflag && Lflag) {
 		Lflag = 0;
 		logadds(LOG_VRB,"-L ignored",NULL,NULL);
 	}
-	
+
 	if(Iflag && iflag) {
 		Iflag = 0;
 		logadds(LOG_VRB,"-I ignored",NULL,NULL);
@@ -160,15 +177,15 @@ int main(int argc, char *argv[]) {
 		fts_opt &= ~FTS_PHYSICAL;
 		fts_opt |= FTS_LOGICAL;
 	}
-	
+
 	scrn_upd_file(NULL,NULL);
 	scrn_upd_part(0,0);
-	
+
 	if(vflag)
 		flags_print();
 	
 	if(mflag) {
-		
+
 		if(stat(argv[0],&st) == -1) {
 			endwin();
 			use_curses = 0;
@@ -180,7 +197,7 @@ int main(int argc, char *argv[]) {
 		argv[1] = NULL;
 		totalfiles = cntfiles(argv,fts_opt) * (argc - 1);
 		argv[1] = targv;
-		
+
 		if(S_ISDIR(st.st_mode) && !Rflag) {
 			endwin();
 			use_curses = 0;
@@ -188,7 +205,7 @@ int main(int argc, char *argv[]) {
 			ret = 1;
 			done(argc-1);
 		}
-		
+
 		for (i=1;i<argc;i++){
 			dest.opath = argv[i];
 			argv[1] = NULL;
@@ -199,16 +216,39 @@ int main(int argc, char *argv[]) {
 			argv[1] = targv;
 		}
 		done(argc-1);
-		
 	}
-	
-	
+
 	dest.opath = argv[argc-1];
 	argv[argc-1] = NULL;
-	totalfiles = cntfiles(argv,fts_opt);	
-	
+	totalfiles = cntfiles(argv,fts_opt);
+
+	if (cflag) {
+		int dest_len = strlen(dest.opath);
+
+		for (int i = 0; i < argc - 1; i++) {
+			char *name = argv[i] + pathnamed(argv[i]);
+			int len = dest_len + strlen(name) + 1;
+			char *path = (char *)malloc(len);
+
+			path[0] = '\0';
+			strcpy(path, dest.opath);
+			pathdadd(path, name);
+			while(stat(path, &st) != -1) {
+				len++;
+				path = (char *)realloc(path, len);
+				strncat(path, "_", 1);
+			}
+
+			paths.size = i + 1;
+			paths.dest = (char **)realloc(paths.dest, len);
+			paths.src = (char **)realloc(paths.src, paths.size);
+			paths.src[i] = argv[i];
+			paths.dest[i] = path;
+		}
+	}
+
 	if(stat(dest.opath,&st) == -1) {
-		if(argc != 2) {
+		if (cflag) {
 			endwin();
 			use_curses = 0;
 			logadds(LOG_ERR,"%s: Not a vaild destination",dest.opath,NULL);
@@ -217,7 +257,7 @@ int main(int argc, char *argv[]) {
 		exist = 0;
 	} else
 		exist = 1;
-	
+
 	if(!exist || !S_ISDIR(st.st_mode)) {
 		if(argc != 2) {
 			endwin();
@@ -239,12 +279,12 @@ int main(int argc, char *argv[]) {
 	} else {
 		if(S_ISDIR(st.st_mode)) {
 			check_iloop(argv,dest.opath); /* check for loop */
-			copyall(argv,fts_opt,T_DIR);	  /*      ->  DIR */
+			copyall(argv,fts_opt,T_DIR);  /*      ->  DIR */
 			done(0);
 		}
-		
+
 		endwin();
-		use_curses = 0;		
+		use_curses = 0;
 		logadds(LOG_ERR,"%s: Not a valid destination",dest.opath,NULL);
 		usage();
 	}
